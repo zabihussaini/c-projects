@@ -1,5 +1,5 @@
-#include<stdio.h>
-#include<string.h>
+#include <stdio.h>
+#include <string.h>
 
 struct student {
     char name[40];
@@ -31,16 +31,13 @@ int mystrcmp(char str1[], char str2[]) {
             return str1[i] - str2[i];
         }
     }
-    if ((str1[i] == '\0') && (str2[i] == '\0')) {
-        return 0;
-    }
+    return str1[i] - str2[i]; // Return difference when one string ends
 }
 
 // Function to scan student data
 void scanstruct(struct student *p) {
     printf("Student name? : ");
     scanf(" %[^\n]", p->name);
-    getchar();
     printf("Roll no: ");
     scanf("%d", &p->r);
     printf("Enter marks: ");
@@ -53,6 +50,7 @@ void sortstudentrollasc(struct student p[], int ne) {
     for (int i = 0; i < ne - 1; i++) {
         for (int j = i + 1; j < ne; j++) {
             if ((p[i].r) > (p[j].r)) {
+                st = (struct temp){.name = "", .r = 0, .m = 0.0}; // Clear temp struct
                 strcpy(st.name, p[i].name);
                 st.r = p[i].r;
                 st.m = p[i].m;
@@ -75,6 +73,7 @@ void sortstudentrolldsc(struct student p[], int ne) {
     for (int i = 0; i < ne - 1; i++) {
         for (int j = i + 1; j < ne; j++) {
             if ((p[i].r) < (p[j].r)) {
+                st = (struct temp){.name = "", .r = 0, .m = 0.0}; // Clear temp struct
                 strcpy(st.name, p[i].name);
                 st.r = p[i].r;
                 st.m = p[i].m;
@@ -91,65 +90,55 @@ void sortstudentrolldsc(struct student p[], int ne) {
     }
 }
 
-void sortstudentmarksasc(struct student p[],int ne){
-	struct temp st;
-	for(int i=0; i<ne-1; i++){
-		for(int j=i+1; j<ne; j++){
-			if((p[i].m)>(p[j].m)){
-				strcpy(st.name,p[i].name);	
-				st.r=p[i].r;
-				st.m=p[i].m;
-				
-				strcpy(p[i].name,p[j].name);
-				p[i].r=p[j].r;
-				p[i].m=p[j].m;
+void sortstudentmarksasc(struct student p[], int ne) {
+    struct temp st;
+    for (int i = 0; i < ne - 1; i++) {
+        for (int j = i + 1; j < ne; j++) {
+            if ((p[i].m) > (p[j].m)) {
+                st = (struct temp){.name = "", .r = 0, .m = 0.0}; // Clear temp struct
+                strcpy(st.name, p[i].name);
+                st.r = p[i].r;
+                st.m = p[i].m;
 
-				strcpy(p[j].name,st.name);
-				p[j].r=st.r;
-				p[j].m=st.m;	
+                strcpy(p[i].name, p[j].name);
+                p[i].r = p[j].r;
+                p[i].m = p[j].m;
 
-			}
-
-		}
-	
-	}
-
+                strcpy(p[j].name, st.name);
+                p[j].r = st.r;
+                p[j].m = st.m;
+            }
+        }
+    }
 }
 
+void sortstudentmarksdsc(struct student p[], int ne) {
+    struct temp st;
+    for (int i = 0; i < ne - 1; i++) {
+        for (int j = i + 1; j < ne; j++) {
+            if ((p[i].m) < (p[j].m)) { // Fix: changed > to <
+                st = (struct temp){.name = "", .r = 0, .m = 0.0}; // Clear temp struct
+                strcpy(st.name, p[i].name);
+                st.r = p[i].r;
+                st.m = p[i].m;
 
-void sortstudentmarksdsc(struct student p[],int ne){
-	struct temp st;
-	for(int i=0; i<ne-1; i++){
-		for(int j=i+1; j<ne; j++){
-			if((p[i].m)>(p[j].m)){
-				strcpy(st.name,p[i].name);	
-				st.r=p[i].r;
-				st.m=p[i].m;
-				
-				strcpy(p[i].name,p[j].name);
-				p[i].r=p[j].r;
-				p[i].m=p[j].m;
+                strcpy(p[i].name, p[j].name);
+                p[i].r = p[j].r;
+                p[i].m = p[j].m;
 
-				strcpy(p[j].name,st.name);
-				p[j].r=st.r;
-				p[j].m=st.m;	
-
-			}
-
-		}
-	
-	}
-
+                strcpy(p[j].name, st.name);
+                p[j].r = st.r;
+                p[j].m = st.m;
+            }
+        }
+    }
 }
-
-
 
 // Function to delete student by name
 void deletestudentbyname(struct student s[], int *ne) {
     char nam[40];
     printf("Enter the student name to delete: ");
     scanf(" %[^\n]", nam);
-    getchar();
     
     for (int i = 0; i < *ne; i++) {
         int c = mystrcmp(s[i].name, nam);
@@ -160,9 +149,9 @@ void deletestudentbyname(struct student s[], int *ne) {
                 s[j].m = s[j + 1].m;
             }
             *ne = *ne - 1;
-            printf("\n");
+            printf("********************************************\n");
             printf("Student '%s' deleted successfully!\n", nam);
-            printf("\n");
+            printf("********************************************\n");
             return;
         }
     }
@@ -174,7 +163,40 @@ void printstruct(struct student *p) {
     printf("Name: %s\nRoll no.: %d\nMarks: %.2f\n", p->name, p->r, p->m);
 }
 
-void main() {
+// Function to find highest and lowest marks
+void findHighestLowestMarks(struct student s[], int ne) {
+    float highest = s[0].m;
+    float lowest = s[0].m;
+    for (int i = 1; i < ne; i++) {
+        if (s[i].m > highest) {
+            highest = s[i].m;
+        }
+        if (s[i].m < lowest) {
+            lowest = s[i].m;
+        }
+    }
+    printf("********************************************\n");
+    printf("Highest marks: %.2f\n", highest);
+    printf("Lowest marks: %.2f\n", lowest);
+    printf("********************************************\n");
+}
+
+// Function to search for a student by name
+void searchStudentByName(struct student s[], int ne) {
+    char nam[40];
+    printf("Enter the student name to search: ");
+    scanf(" %[^\n]", nam);
+    
+    for (int i = 0; i < ne; i++) {
+        if (mystrcmp(s[i].name, nam) == 0) {
+            printstruct(&s[i]);
+            return;
+        }
+    }
+    printf("Student '%s' not found!\n", nam);
+}
+
+int main() {
     int ne, op;
     printf("Enter the number of students: ");
     scanf("%d", &ne);
@@ -186,60 +208,65 @@ void main() {
         printf("\n");
     }
 
-    printf("\n**\n");
+    printf("\n********************************************\n");
 
     while (1) {
-        printf("Enter 1 to sort student data(ascend)\n");
-        printf("Enter 2 to sort student data(desecnd)\n");
+        printf("\n********************************************\n");
+        printf("Enter 1 to sort student data (ascending by roll number)\n");
+        printf("Enter 2 to sort student data (descending by roll number)\n");
         printf("Enter 3 to delete student by name\n");
-        printf("Enter 4 to sort student data by marks(asc)\n");
-        printf("Enter 5 to sort student data by marks(dsc)\n");
+        printf("Enter 4 to sort student data by marks (ascending)\n");
+        printf("Enter 5 to sort student data by marks (descending)\n");
         printf("Enter 6 to print student list\n");
-        printf("Enter 7 to exit\n");
-        printf("\n");
+        printf("Enter 7 to find highest and lowest marks\n");
+        printf("Enter 8 to search for a student by name\n");
+        printf("Enter 9 to exit\n");
+        printf("********************************************\n");
         printf("Enter the number to perform operation: ");
         scanf("%d", &op);
 
         switch (op) {
             case 1:
                 sortstudentrollasc(s, ne);
-                printf("\n");
+                printf("********************************************\n");
                 printf("Students sorted by roll number (ascending).\n");
-                printf("\n");
                 break;
             case 2:
                 sortstudentrolldsc(s, ne);
-                printf("\n");
-                printf("Students sorted by roll number (ascending).\n");
-                printf("\n");
+                printf("********************************************\n");
+                printf("Students sorted by roll number (descending).\n");
                 break;    
             case 3:
                 deletestudentbyname(s, &ne);
                 break;
             case 4:
                 sortstudentmarksasc(s, ne);
-                printf("\n");
-                printf("Students sorted by roll number (ascending).\n");
-                printf("\n");
-                break;
+                printf("********************************************\n");
+                printf("Students sorted by marks (ascending).\n");
+                break;    
             case 5:
                 sortstudentmarksdsc(s, ne);
-                printf("\n");
-                printf("Students sorted by roll number (ascending).\n");
-                printf("\n");
-                break;    
+                printf("********************************************\n");
+                printf("Students sorted by marks (descending).\n");
+                break;  
             case 6:
+                printf("Student List:\n");
                 for (int i = 0; i < ne; i++) {
                     printstruct(&s[i]);
-                    printf("\n");
                 }
-                break;
+                break;    
             case 7:
-                return;
+                findHighestLowestMarks(s, ne);
+                break;    
+            case 8:
+                searchStudentByName(s, ne);
+                break;    
+            case 9:
+                printf("Exiting program.\n");
+                return 0;
             default:
-            printf("\n");
-                printf("Invalid option!\n");
-                printf("\n");
+                printf("Invalid option. Please try again.\n");
         }
     }
+    return 0;
 }
