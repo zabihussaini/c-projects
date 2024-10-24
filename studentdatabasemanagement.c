@@ -1,13 +1,8 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 struct student {
-    char name[40];
-    int r;
-    float m;
-};
-
-struct temp {
     char name[40];
     int r;
     float m;
@@ -26,15 +21,15 @@ int mystrlen(char str[]) {
 // Function to compare two strings
 int mystrcmp(char str1[], char str2[]) {
     int i;
-    for (i = 0; str1[i]; i++) {
+    for (i = 0; str1[i] && str2[i]; i++) {
         if (str1[i] != str2[i]) {
             return str1[i] - str2[i];
         }
     }
-    return str1[i] - str2[i]; // Return difference when one string ends
+    return str1[i] - str2[i];
 }
 
-// Function to scan student data
+// Function to scan student data manually (one-by-one)
 void scanstruct(struct student *p) {
     printf("Student name? : ");
     scanf(" %[^\n]", p->name);
@@ -44,24 +39,24 @@ void scanstruct(struct student *p) {
     scanf("%f", &p->m);
 }
 
+// Function to input student data in bulk
+void scanstruct_bulk(struct student p[], int ne) {
+    printf("Enter student details in the format: name roll_no marks (space separated)\n");
+    for (int i = 0; i < ne; i++) {
+        printf("Student %d: ", i + 1);
+        scanf(" %s %d %f", p[i].name, &p[i].r, &p[i].m);
+    }
+}
+
 // Function to sort students based on roll number in ascending order
 void sortstudentrollasc(struct student p[], int ne) {
-    struct temp st;
+    struct student st;
     for (int i = 0; i < ne - 1; i++) {
         for (int j = i + 1; j < ne; j++) {
             if ((p[i].r) > (p[j].r)) {
-                st = (struct temp){.name = "", .r = 0, .m = 0.0}; // Clear temp struct
-                strcpy(st.name, p[i].name);
-                st.r = p[i].r;
-                st.m = p[i].m;
-
-                strcpy(p[i].name, p[j].name);
-                p[i].r = p[j].r;
-                p[i].m = p[j].m;
-
-                strcpy(p[j].name, st.name);
-                p[j].r = st.r;
-                p[j].m = st.m;
+                st = p[i];
+                p[i] = p[j];
+                p[j] = st;
             }
         }
     }
@@ -69,66 +64,41 @@ void sortstudentrollasc(struct student p[], int ne) {
 
 // Function to sort students based on roll number in descending order
 void sortstudentrolldsc(struct student p[], int ne) {
-    struct temp st;
+    struct student st;
     for (int i = 0; i < ne - 1; i++) {
         for (int j = i + 1; j < ne; j++) {
             if ((p[i].r) < (p[j].r)) {
-                st = (struct temp){.name = "", .r = 0, .m = 0.0}; // Clear temp struct
-                strcpy(st.name, p[i].name);
-                st.r = p[i].r;
-                st.m = p[i].m;
-
-                strcpy(p[i].name, p[j].name);
-                p[i].r = p[j].r;
-                p[i].m = p[j].m;
-
-                strcpy(p[j].name, st.name);
-                p[j].r = st.r;
-                p[j].m = st.m;
+                st = p[i];
+                p[i] = p[j];
+                p[j] = st;
             }
         }
     }
 }
 
+// Function to sort students based on marks in ascending order
 void sortstudentmarksasc(struct student p[], int ne) {
-    struct temp st;
+    struct student st;
     for (int i = 0; i < ne - 1; i++) {
         for (int j = i + 1; j < ne; j++) {
             if ((p[i].m) > (p[j].m)) {
-                st = (struct temp){.name = "", .r = 0, .m = 0.0}; // Clear temp struct
-                strcpy(st.name, p[i].name);
-                st.r = p[i].r;
-                st.m = p[i].m;
-
-                strcpy(p[i].name, p[j].name);
-                p[i].r = p[j].r;
-                p[i].m = p[j].m;
-
-                strcpy(p[j].name, st.name);
-                p[j].r = st.r;
-                p[j].m = st.m;
+                st = p[i];
+                p[i] = p[j];
+                p[j] = st;
             }
         }
     }
 }
 
+// Function to sort students based on marks in descending order
 void sortstudentmarksdsc(struct student p[], int ne) {
-    struct temp st;
+    struct student st;
     for (int i = 0; i < ne - 1; i++) {
         for (int j = i + 1; j < ne; j++) {
-            if ((p[i].m) < (p[j].m)) { // Fix: changed > to <
-                st = (struct temp){.name = "", .r = 0, .m = 0.0}; // Clear temp struct
-                strcpy(st.name, p[i].name);
-                st.r = p[i].r;
-                st.m = p[i].m;
-
-                strcpy(p[i].name, p[j].name);
-                p[i].r = p[j].r;
-                p[i].m = p[j].m;
-
-                strcpy(p[j].name, st.name);
-                p[j].r = st.r;
-                p[j].m = st.m;
+            if ((p[i].m) < (p[j].m)) {
+                st = p[i];
+                p[i] = p[j];
+                p[j] = st;
             }
         }
     }
@@ -160,6 +130,7 @@ void deletestudentbyname(struct student s[], int *ne) {
 
 // Function to print student details
 void printstruct(struct student *p) {
+    printf("\n\n");
     printf("Name: %s\nRoll no.: %d\nMarks: %.2f\n", p->name, p->r, p->m);
 }
 
@@ -197,15 +168,30 @@ void searchStudentByName(struct student s[], int ne) {
 }
 
 int main() {
-    int ne, op;
+    int ne, op, input_mode;
     printf("Enter the number of students: ");
     scanf("%d", &ne);
 
-    struct student s[ne];
+    struct student *s = malloc(ne * sizeof(struct student)); // Dynamic memory allocation
 
-    for (int i = 0; i < ne; i++) {
-        scanstruct(&s[i]);
-        printf("\n");
+    printf("Choose input mode:\n");
+    printf("Enter 1 for Manual Input (one by one)\n");
+    printf("Enter 2 for Bulk Input (all at once)\n");
+    scanf("%d", &input_mode);
+
+    if (input_mode == 1) {
+        // Manual Input Mode
+        for (int i = 0; i < ne; i++) {
+            scanstruct(&s[i]);
+            printf("\n");
+        }
+    } else if (input_mode == 2) {
+        // Bulk Input Mode
+        scanstruct_bulk(s, ne);
+    } else {
+        printf("Invalid input mode. Exiting.\n");
+        free(s);
+        return 0;
     }
 
     printf("\n********************************************\n");
@@ -260,13 +246,12 @@ int main() {
                 break;    
             case 8:
                 searchStudentByName(s, ne);
-                break;    
+                break;
             case 9:
-                printf("Exiting program.\n");
+                free(s); // Free dynamically allocated memory
                 return 0;
             default:
-                printf("Invalid option. Please try again.\n");
+                printf("Invalid choice!\n");
         }
     }
-    return 0;
 }
